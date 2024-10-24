@@ -50,6 +50,36 @@ void page_allocate(size_t va) {
     }
 }
 
+int page_deallocate(size_t va) {
+    if (ptbr == 0) {
+        return -1;
+    }
+
+    size_t *table = (size_t *)ptbr;
+    size_t index;
+
+    for (int level = 0; level < LEVELS - 1; level++) {
+        index = (va >> (POBITS + ((LEVELS - 1 - level) * (POBITS - 3)))) & ((1 << (POBITS - 3)) - 1);
+
+        if ((table[index] & 1) == 0) {
+            return -1;
+        }
+
+        table = (size_t *)(table[index] & ~1);
+    }
+
+    index = (va >> POBITS) & ((1 << (POBITS - 3)) - 1);
+
+    if ((table[index] & 1) == 0) {
+        return -1;
+    }
+
+    free((void *)(table[index] & ~1));
+    table[index] = 0;
+
+    return 0;
+}
+
 size_t translate(size_t va) {
     if (ptbr == 0) {
         return ~0;

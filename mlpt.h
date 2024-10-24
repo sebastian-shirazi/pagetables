@@ -20,4 +20,7 @@ size_t translate(size_t va);
  * address. If there already is such a page, does nothing.
  */
 void page_allocate(size_t va);
+
+int page_deallocate(size_t va);
+
 #endif

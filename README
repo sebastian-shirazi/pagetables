@@ -8,5 +8,4 @@ Although this implementation works for our testing purposes, it may not be fully
 For time complexity the lookup in this pagetable is dependent on the number of levels contained in the table. This is because if the offset is not defined on a level, we will need to traverse the levels of the pagetable until a hit is present at a given address. So we can say the time this table takes to lookup an address is defined by O(L), where L is `LEVELS`. For space complexity, the multi-level page table is a `LEVELS` level page table, with say `n` entries per level. This would be defined as O(n * L) for spacial complexity.
 
 # Support for De-Allocation
-
-#
+After reviewing the allocate and translate function, it is possible to have a page de-allocation function, defined in `mlpt.h` as `int page_deallocate(size_t va);`. This function would take a virtual address, and de-allocates the page corresponding to that address and will need help from a helper function to free the memory. This works as the allocation of a page is not affected by a de-allocation, and the translation of a virtual address to a physical address also is not affected by a deallocation of a page. The de-allocation function would return -1 if unsuccessful, and 0 if successful.
