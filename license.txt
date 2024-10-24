@@ -1,0 +1,8 @@
+Licenses Considered:
+    1. MIT (chosen)
+    2. GPL
+    3. Apache
+
+1. MIT: The MIT license seems to be the most permissive of my top 3 licenses, which allows for users to use my code as they please with the correct license. I chose to use this license as it is easy, simple, and does not require an extensive background in copyright law to understand how this license operates
+2. GPL: The GPL license requires for those who modify my code to include the source code that was included under the license. I ended up not choosing this license as for this project, I wanted my code to be widely availible and easy to distribute / modify, and GPL is almost there but has another barrier to modification.
+3. Apache: This license seems to be the most similar to the MIT license, with the exception that it requires additional provisions to address patent rights. This is yet another complication that I felt was unnessary for this project, which led me to not pick the Apache license either.
