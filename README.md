@@ -1,0 +1,12 @@
+# How to Customize config.h
+In `config.h`, there are two constants defined: `LEVELS` and `POBITS`. `LEVELS` represents the number of levels of this multi-level page table, and changing the number of levels will result in the virtual memory address spacing being split by the specified number of levels. `POBITS` on the other hand defines how many offset bits each address contains. In this configuration, there are 12 offset bits deinfed in `config.h`, and these bits are just used in order to locate specific data that maps to each offset on a given page.
+
+# Limitations
+Although this implementation works for our testing purposes, it may not be fully complete. There are edge cases that result in page faults that might not pass for this page table, as well as the pagetable implementation itself not adhering to the LRU priniciple for evicting pages. For future improvements, I could implement a form of "caching" within my program to track the state of the data stored in the sets, and see which data is accesses more frequently when choosing which address to evict from the table.
+
+# Time and Space Complexity
+For time complexity the lookup in this pagetable is dependent on the number of levels contained in the table. This is because if the offset is not defined on a level, we will need to traverse the levels of the pagetable until a hit is present at a given address. So we can say the time this table takes to lookup an address is defined by O(L), where L is `LEVELS`. For space complexity, the multi-level page table is a `LEVELS` level page table, with say `n` entries per level. This would be defined as O(n * L) for spacial complexity.
+
+# Support for De-Allocation
+
+#
