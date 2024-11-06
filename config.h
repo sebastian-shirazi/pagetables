@@ -3,3 +3,9 @@
 
 /** POBITS = number of bits used for the page offset. */
 #define POBITS  12
+
+/** NUM_SETS = number of sets in the TLB. */
+#define NUM_SETS 16
+
+/** ASSOCIATIVITY = number of ways in each TLB set. */
+#define ASSOCIATIVITY 4
