@@ -6,6 +6,10 @@
 #include "config.h"
 
 
+#define NUM_SETS 16
+#define ASSOCIATIVITY 4
+#define PAGE_MASK (~((1 << POBITS) - 1))
+
 typedef struct {
     int valid;
     size_t vpn;
@@ -32,34 +36,68 @@ void tlb_clear(void) {
     }
 }
 
+static void update_lru(tlb_set_t *set, int accessed_index) {
+    for (int i = 0; i < ASSOCIATIVITY; i++) {
+        if (set->entries[i].valid) {
+            if (i == accessed_index) {
+                set->entries[i].lru = 1;
+            }
+            else if (set->entries[i].lru < ASSOCIATIVITY) {
+                set->entries[i].lru++;
+            }
+        }
+    }
+}
+
 size_t tlb_translate(size_t va) {
-    size_t vpn = va >> POBITS;
+    size_t vpn = va & PAGE_MASK;
     size_t set_index = get_set_index(vpn);
     tlb_set_t *set = &tlb[set_index];
+    size_t offset = va & ((1 << POBITS) - 1);
 
     for (int i = 0; i < ASSOCIATIVITY; i++) {
         if (set->entries[i].valid && set->entries[i].vpn == vpn) {
-            size_t offset = va & ((1 << POBITS) - 1);
+            update_lru(set, i);
             return (set->entries[i].ppn << POBITS) | offset;
         }
     }
 
-    size_t pa = translate(vpn << POBITS);
-
-    if (pa == -1) {
+    size_t pa = translate(vpn);
+    if (pa == (size_t)-1) {
         return -1;
     }
-    return pa | (va & ((1 << POBITS) - 1));
+
+    int lru_index = 0;
+    int max_lru = 0;
+
+    for (int i = 0; i < ASSOCIATIVITY; i++) {
+        if (!set->entries[i].valid) {
+            lru_index = i;
+            break;
+        }
+        if (set->entries[i].lru > max_lru) {
+            max_lru = set->entries[i].lru;
+            lru_index = i;
+        }
+    }
+
+    set->entries[lru_index].valid = 1;
+    set->entries[lru_index].vpn = vpn;
+    set->entries[lru_index].ppn = pa >> POBITS;
+
+    update_lru(set, lru_index);
+
+    return (pa & PAGE_MASK) | offset;
 }
 
 int tlb_peek(size_t va) {
-    size_t vpn = va >> POBITS;
+    size_t vpn = va & PAGE_MASK;
     size_t set_index = get_set_index(vpn);
     tlb_set_t *set = &tlb[set_index];
 
     for (int i = 0; i < ASSOCIATIVITY; i++) {
         if (set->entries[i].valid && set->entries[i].vpn == vpn) {
-            return 1;
+            return set->entries[i].lru;
         }
     }
     return 0;
